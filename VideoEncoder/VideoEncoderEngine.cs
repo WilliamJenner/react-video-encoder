@@ -1,6 +1,7 @@
 ﻿using FFMpegCore;
 using FFMpegCore.Enums;
 using FFMpegCore.Pipes;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System;
 using System.ComponentModel.DataAnnotations;
@@ -9,6 +10,7 @@ using System.IO;
 using System.IO.Pipelines;
 using System.IO.Pipes;
 using System.Threading.Tasks;
+using VideoEncoderReact.Extensions;
 using VideoEncoderReact.VideoEncoder.Interfaces;
 
 namespace VideoEncoderReact.VideoEncoder
@@ -31,16 +33,27 @@ namespace VideoEncoderReact.VideoEncoder
             GenerateNewOutputFileName();
         }
 
-        public async Task<bool> SetInputFile(byte[] inputFile)
+        public async Task<bool> SetInputFile(IFormFile input)
         {
-            var stream = new FileStream(this.InputFileName, FileMode.Create);
-            stream.Write(inputFile);
+            var inputBytes = input.GetBytesAsync();
+ 
+            try
+            {
+                var stream = new FileStream(this.InputFileName, FileMode.Create);
+                stream.Write(inputBytes.Result);
 
-            var mediaInfo = await FFProbe.AnalyseAsync(stream);
+                return true;
+            }
+            catch (IOException ex)
+            {
+                _logger.LogError($"IOException in SetInputFile(), attempted to write to {this.InputFileName}", ex);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error in SetInputFile()", ex);
+            }
 
-            this.mediaAnalysis = mediaInfo;
-
-            return mediaInfo != null;
+            return false;
         }
 
         public async Task<bool> WriteVideo()
@@ -106,7 +119,7 @@ namespace VideoEncoderReact.VideoEncoder
 
         private void GenerateNewInputFileName()
         {
-            this.InputFileName = Path.Combine("C:\\Users\\Will\\Documents", "Wildlife.avi");
+            this.InputFileName = $"input/{Guid.NewGuid()}.{this.FileType}";
         }
 
         private void ResetOutputFile()
@@ -122,7 +135,7 @@ namespace VideoEncoderReact.VideoEncoder
                 throw new NullReferenceException("this.FileType was null in VideoEncoderEngine.GenerateNewOutputFileName()");
             }
 
-            this.OutputFileName = $"{Guid.NewGuid()}.{this.FileType}";
+            this.OutputFileName = $"output/{Guid.NewGuid()}.{this.FileType}";
         }
 
         #endregion

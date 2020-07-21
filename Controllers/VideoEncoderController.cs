@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using VideoEncoderReact.Extensions;
 using VideoEncoderReact.VideoEncoder.Interfaces;
 
 namespace VideoEncoderReact.Controllers
@@ -23,11 +24,12 @@ namespace VideoEncoderReact.Controllers
         }
 
         [HttpPost("SetInputVideo")]
-        public async Task<IActionResult> SetInputVideo([FromBody] byte[] input)
+        public async Task<IActionResult> SetInputVideo([FromForm] IFormFile videoInput)
         {
             try
             {
-                return Ok(await _videoEncoderEngine.SetInputFile(input));
+                await _videoEncoderEngine.SetInputFile(videoInput);
+                return Ok();
             }
             catch (Exception ex)
             {
