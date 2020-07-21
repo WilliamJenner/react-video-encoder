@@ -36,7 +36,7 @@ namespace VideoEncoderReact.Controllers
             }
         }
 
-        [HttpPost("WriteVideo")]
+        [HttpPost("StartWrite")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> StartWrite()
         {

@@ -25,9 +25,9 @@ namespace VideoEncoderReact.VideoEncoder
         public VideoEncoderEngine(ILogger<VideoEncoderEngine> logger)
         {
             this._logger = logger;
+            this.FileType = "mp4";
 
-
-            GenerateNewInputFileName(); // Set this.FileName
+            GenerateNewInputFileName(); 
             GenerateNewOutputFileName();
         }
 
@@ -53,22 +53,30 @@ namespace VideoEncoderReact.VideoEncoder
 
             try
             {
-                var stopWatch = new Stopwatch();
-                _logger.LogInformation($"Starting writing input video {this.InputFileName} to {this.OutputFileName}");
-                stopWatch.Start();
+                if (File.Exists(this.InputFileName))
+                {
+                    var stopWatch = new Stopwatch();
+                    _logger.LogInformation($"Starting writing input video {this.InputFileName} to {this.OutputFileName}");
+                    var fileInfo = new FileInfo(this.InputFileName);
+                    stopWatch.Start();
+                    await FFMpegArguments
+                                    .FromInputFiles(fileInfo)
+                                    .WithVideoCodec(VideoCodec.LibX264)
+                                    .WithConstantRateFactor(21)
+                                    .WithAudioCodec(AudioCodec.Aac)
+                                    .WithVariableBitrate(4)
+                                    .WithFastStart()
+                                    .Scale(VideoSize.Hd)
+                                    .OutputToFile(this.OutputFileName)
+                                    .ProcessAsynchronously();
 
-                await FFMpegArguments
-                .FromInputFiles(this.InputFileName)
-                .WithVideoCodec(VideoCodec.LibX264)
-                .WithAudioCodec(AudioCodec.Aac)
-                .Scale(VideoSize.Hd)
-                .OutputToFile(this.OutputFileName)
-                .ProcessAsynchronously();
-
-                _logger.LogInformation($"Finished writing video to {this.OutputFileName} in {stopWatch.ElapsedMilliseconds.ToString("n3")}ms");
-                stopWatch.Stop();
-                return true;
-
+                    _logger.LogInformation($"Finished writing video to {this.OutputFileName} in {stopWatch.ElapsedMilliseconds.ToString("n3")}ms");
+                    stopWatch.Stop();
+                    return true;
+                } else
+                {
+                    throw new FileNotFoundException($"File not found: {this.InputFileName}");
+                }
             }
             catch (Exception ex)
             {
@@ -98,7 +106,7 @@ namespace VideoEncoderReact.VideoEncoder
 
         private void GenerateNewInputFileName()
         {
-            this.InputFileName = $"Wildlife.avi";
+            this.InputFileName = Path.Combine("C:\\Users\\Will\\Documents", "Wildlife.avi");
         }
 
         private void ResetOutputFile()
@@ -114,7 +122,7 @@ namespace VideoEncoderReact.VideoEncoder
                 throw new NullReferenceException("this.FileType was null in VideoEncoderEngine.GenerateNewOutputFileName()");
             }
 
-            this.OutputFileName = $"{new Guid()}.{this.FileType}";
+            this.OutputFileName = $"{Guid.NewGuid()}.{this.FileType}";
         }
 
         #endregion

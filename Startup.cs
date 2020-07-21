@@ -1,3 +1,4 @@
+using FFMpegCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -15,6 +16,7 @@ namespace VideoEncoderReact
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+            FFMpegOptions.Configure(new FFMpegOptions { RootDirectory = "./ffmpeg/bin", TempDirectory = "./tmp" });
         }
 
         public IConfiguration Configuration { get; }

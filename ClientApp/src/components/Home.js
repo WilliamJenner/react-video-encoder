@@ -8,7 +8,7 @@ export class Home extends Component {
     return (
       <div>
             <Button onClick={() => {
-                fetch("/VideoEncoder/StartWrite", {
+                fetch("api/VideoEncoder/StartWrite", {
                     method: "POST",
                 }).then(res => {
                     console.log("Response ", res);
