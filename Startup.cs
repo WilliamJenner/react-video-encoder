@@ -1,6 +1,7 @@
 using FFMpegCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.Extensions.Configuration;
@@ -28,6 +29,7 @@ namespace VideoEncoderReact
             services.AddControllersWithViews();
             services.AddControllers();
             services.AddSingleton<IVideoEncoderEngine, VideoEncoderEngine>();
+            services.Configure<FormOptions>(x => x.MultipartBodyLengthLimit = 737280000);
 
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration =>

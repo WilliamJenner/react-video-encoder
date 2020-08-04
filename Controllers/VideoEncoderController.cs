@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -24,16 +25,17 @@ namespace VideoEncoderReact.Controllers
         }
 
         [HttpPost("SetInputVideo")]
-        public async Task<IActionResult> SetInputVideo([FromForm] IFormFile videoInput)
+        [DisableRequestSizeLimit]
+        public async Task<IActionResult> SetInputVideo()
         {
             try
             {
-                await _videoEncoderEngine.SetInputFile(videoInput);
+                var x = HttpContext.Request.Form;
                 return Ok();
             }
             catch (Exception ex)
             {
-                _logger.LogError("Exception bubbled up to controller, SetInputVideo(byte[] input)", ex);
+             _logger.LogError("Exception bubbled up to controller, SetInputVideo(byte[] input)", ex);
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }

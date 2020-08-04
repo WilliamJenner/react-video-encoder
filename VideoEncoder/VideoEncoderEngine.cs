@@ -35,12 +35,12 @@ namespace VideoEncoderReact.VideoEncoder
 
         public async Task<bool> SetInputFile(IFormFile input)
         {
-            var inputBytes = input.GetBytesAsync();
- 
+            var x = await input.GetBytesAsync();
+            
             try
             {
                 var stream = new FileStream(this.InputFileName, FileMode.Create);
-                stream.Write(inputBytes.Result);
+               
 
                 return true;
             }
