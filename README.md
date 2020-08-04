@@ -16,4 +16,5 @@ This project uses the nuget package [FFMpegCore](https://github.com/rosenbjerg/F
 
 # License
 GNU GPLv3
+
 https://choosealicense.com/licenses/gpl-3.0/
