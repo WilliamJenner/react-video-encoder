@@ -30,7 +30,7 @@ namespace VideoEncoderReact.Controllers
         {
             try
             {
-                var x = HttpContext.Request.Form;
+                await _videoEncoderEngine.SetInputFile(HttpContext.Request.Form.Files.First());
                 return Ok();
             }
             catch (Exception ex)
@@ -40,7 +40,7 @@ namespace VideoEncoderReact.Controllers
             }
         }
 
-        [HttpPost("StartWrite")]
+        [HttpGet("StartWrite")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> StartWrite()
         {

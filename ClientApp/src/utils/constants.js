@@ -1,5 +1,7 @@
 ﻿export const Constants = {
     apiUrl: "/api/",
     videoControllerUrl: "VideoEncoder/",
-    setVideoUrl: "SetInputVideo"
+    setVideoUrl: "SetInputVideo",
+    writeVideoUrl: "StartWrite"
+    
 }

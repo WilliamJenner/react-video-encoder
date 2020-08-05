@@ -17,36 +17,23 @@ namespace VideoEncoderReact.VideoEncoder
 {
     public class VideoEncoderEngine : IVideoEncoderEngine
     {
-        private string InputFileName;
         private string OutputFileName;
         private string FileType;
-        private MediaAnalysis mediaAnalysis;
-        private byte[] video;
+        private byte[] InputVideo;
         private readonly ILogger<VideoEncoderEngine> _logger;
 
         public VideoEncoderEngine(ILogger<VideoEncoderEngine> logger)
         {
             this._logger = logger;
             this.FileType = "mp4";
-
-            GenerateNewInputFileName(); 
             GenerateNewOutputFileName();
         }
 
         public async Task<bool> SetInputFile(IFormFile input)
         {
-            var x = await input.GetBytesAsync();
-            
             try
             {
-                var stream = new FileStream(this.InputFileName, FileMode.Create);
-               
-
-                return true;
-            }
-            catch (IOException ex)
-            {
-                _logger.LogError($"IOException in SetInputFile(), attempted to write to {this.InputFileName}", ex);
+                this.InputVideo = await input.GetBytesAsync();
             }
             catch (Exception ex)
             {
@@ -59,21 +46,22 @@ namespace VideoEncoderReact.VideoEncoder
         public async Task<bool> WriteVideo()
         {
 
-            if (this.InputFileName == string.Empty || this.OutputFileName == string.Empty)
+            if (this.OutputFileName == string.Empty)
             {
-                throw new Exception($"InputFileName was {InputFileName} and OutputFileName was {OutputFileName}");
+                throw new Exception($"OutputFileName was {OutputFileName}");
             }
 
             try
             {
-                if (File.Exists(this.InputFileName))
+                
                 {
+                    var pipe = new StreamPipeSource(InputVideo.ToMemoryStream());
                     var stopWatch = new Stopwatch();
-                    _logger.LogInformation($"Starting writing input video {this.InputFileName} to {this.OutputFileName}");
-                    var fileInfo = new FileInfo(this.InputFileName);
+                    _logger.LogInformation($"Starting writing input video to {this.OutputFileName}");
+                    
                     stopWatch.Start();
                     await FFMpegArguments
-                                    .FromInputFiles(fileInfo)
+                                    .FromPipe(pipe)
                                     .WithVideoCodec(VideoCodec.LibX264)
                                     .WithConstantRateFactor(21)
                                     .WithAudioCodec(AudioCodec.Aac)
@@ -83,13 +71,11 @@ namespace VideoEncoderReact.VideoEncoder
                                     .OutputToFile(this.OutputFileName)
                                     .ProcessAsynchronously();
 
-                    _logger.LogInformation($"Finished writing video to {this.OutputFileName} in {stopWatch.ElapsedMilliseconds.ToString("n3")}ms");
+                    _logger.LogInformation($"Finished writing video to {this.OutputFileName} in " +
+                        $"{stopWatch.ElapsedMilliseconds.ToString("n3")}ms");
                     stopWatch.Stop();
                     return true;
-                } else
-                {
-                    throw new FileNotFoundException($"File not found: {this.InputFileName}");
-                }
+                } 
             }
             catch (Exception ex)
             {
@@ -101,26 +87,15 @@ namespace VideoEncoderReact.VideoEncoder
 
         public async Task<byte[]> GetVideo()
         {
-            if (this.video == null)
+            if (this.InputVideo == null)
             {
                 throw new NullReferenceException("An exception occured at GetVideo(), the video was null.");
             }
 
-            return this.video;
+            return this.InputVideo;
         }
 
         #region Private Methods
-
-        private void ResetInputFile()
-        {
-            File.Delete(this.InputFileName);
-            this.GenerateNewInputFileName();
-        }
-
-        private void GenerateNewInputFileName()
-        {
-            this.InputFileName = $"input/{Guid.NewGuid()}.{this.FileType}";
-        }
 
         private void ResetOutputFile()
         {

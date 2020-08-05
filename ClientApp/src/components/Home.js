@@ -9,7 +9,7 @@ export class Home extends Component {
     super()
 
     this.state = {
-      url: `${Constants.apiUrl}${Constants.videoControllerUrl}${Constants.setVideoUrl}`,
+      url: `${Constants.apiUrl}${Constants.videoControllerUrl}`,
       videoInput: undefined,
     }
   }
@@ -28,7 +28,7 @@ export class Home extends Component {
     var formData = this.createFormData();
     console.log(formData.get("file"));
     $.ajax({
-      url: this.state.url,
+        url: `${this.state.url}${Constants.setVideoUrl}`,
       data: formData,
       processData:false,
       contentType: false,
@@ -48,15 +48,27 @@ export class Home extends Component {
     var fd = new FormData();
     fd.append('file', this.state.videoInput);
     return fd;
-  }
+    }
+
+    onWriteClick = (e) => {
+        $.ajax({
+            url: `${this.state.url}${Constants.writeVideoUrl}`,
+            processData: false,
+            contentType: false,
+            method: 'GET',
+            success: () => { }
+        });
+    }
 
   render() {
     return (
         <div>
-            <form encType="multipart/form-data" onSubmit={this.onSubmit}>
+         <form encType="multipart/form-data" onSubmit={this.onSubmit}>
           <input id="video-file" name="videoInput" type="file" onChange={this.onVideoInputChange} />
           <input type="submit" value="Submit" />
-        </form>
+            </form>
+
+            <Button onClick={this.onWriteClick}>Write Video</Button>
       </div>
     );
   }
