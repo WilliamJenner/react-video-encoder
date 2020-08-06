@@ -12,11 +12,9 @@ namespace VideoEncoderReact.Extensions
         {
             try
             {
-                using (var fs = new FileStream(fileName, FileMode.Create, FileAccess.Write))
-                {
-                    await fs.WriteAsync(byteArray, 0, byteArray.Length);
-                    return true;
-                }
+                await using var fs = new FileStream(fileName, FileMode.Create, FileAccess.Write);
+                await fs.WriteAsync(byteArray, 0, byteArray.Length);
+                return true;
             }
             catch (Exception ex)
             {
