@@ -14,7 +14,8 @@ You will need to add the executables to ./ffmpeg/bin/(ffmpeg|ffprobe).exe
 # Dependencies
 This project uses the nuget package [FFMpegCore](https://github.com/rosenbjerg/FFMpegCore). It is used to perform the video encoding.
 
-# License
-GNU GPLv3
+# Licensing
+This project uses [FFMpegCore](https://github.com/rosenbjerg/FFMpegCore), which is licensed under the [MIT License ](https://github.com/rosenbjerg/FFMpegCore/blob/master/LICENSE)
 
-https://choosealicense.com/licenses/gpl-3.0/
+This project is released under [GNU GPLv3](https://choosealicense.com/licenses/gpl-3.0/)
+
