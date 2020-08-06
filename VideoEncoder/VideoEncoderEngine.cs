@@ -18,13 +18,13 @@ namespace VideoEncoderReact.VideoEncoder
 {
     public class VideoEncoderEngine : IVideoEncoderEngine
     {
-        private string OutputFileName;
-        private string FileType;
-        private byte[] InputVideo;
+        private string _outputFileName;
+        private string _fileType; //shut up ReSharper this won't be readonly forever
+        private byte[] _inputVideo;
 
         public VideoEncoderEngine()
         {
-            FileType = "mp4";
+            _fileType = "mp4";
             GenerateNewOutputFileName();
         }
 
@@ -32,7 +32,7 @@ namespace VideoEncoderReact.VideoEncoder
         {
             try
             {
-                InputVideo = await input.GetBytesAsync();
+                _inputVideo = await input.GetBytesAsync();
             }
             catch (Exception ex)
             {
@@ -45,18 +45,18 @@ namespace VideoEncoderReact.VideoEncoder
         public async Task<bool> WriteVideo()
         {
 
-            if (OutputFileName == string.Empty)
+            if (_outputFileName == string.Empty)
             {
-                throw new Exception($"OutputFileName was {OutputFileName}");
+                throw new Exception($"OutputFileName was {_outputFileName}");
             }
 
             try
             {
                 
                 {
-                    var pipe = new StreamPipeSource(await InputVideo.ToMemoryStreamAsync());
+                    var pipe = new StreamPipeSource(await _inputVideo.ToMemoryStreamAsync());
                     var stopWatch = new Stopwatch();
-                  Log.Information($"Starting writing input video to {this.OutputFileName}");
+                  Log.Information($"Starting writing input video to {this._outputFileName}");
                     
                     stopWatch.Start();
                     await FFMpegArguments
@@ -67,11 +67,11 @@ namespace VideoEncoderReact.VideoEncoder
                                     .WithVariableBitrate(4)
                                     .WithFastStart()
                                     .Scale(VideoSize.Hd)
-                                    .OutputToFile(this.OutputFileName)
+                                    .OutputToFile(this._outputFileName)
                                     .ProcessAsynchronously();
 
-                    Log.Information($"Finished writing video to {this.OutputFileName} in " +
-                        $"{stopWatch.ElapsedMilliseconds.ToString("n3")}ms");
+                    Log.Information($"Finished writing video to {this._outputFileName} in " +
+                        $"{stopWatch.ElapsedMilliseconds:n3}ms");
                     stopWatch.Stop();
                     return true;
                 } 
@@ -86,30 +86,30 @@ namespace VideoEncoderReact.VideoEncoder
 
         public Task<byte[]> GetVideo()
         {
-            if (InputVideo == null)
+            if (_inputVideo == null)
             {
                 throw new NullReferenceException("An exception occured at GetVideo(), the video was null.");
             }
 
-            return Task.FromResult(InputVideo);
+            return Task.FromResult(_inputVideo);
         }
 
         #region Private Methods
 
         private void ResetOutputFile()
         {
-            File.Delete(this.OutputFileName);
+            File.Delete(this._outputFileName);
             this.GenerateNewOutputFileName();
         }
 
         private void GenerateNewOutputFileName()
         {
-            if (this.FileType == null)
+            if (this._fileType == null)
             {
                 throw new NullReferenceException("this.FileType was null in VideoEncoderEngine.GenerateNewOutputFileName()");
             }
 
-            this.OutputFileName = $"output/{Guid.NewGuid()}.{this.FileType}";
+            this._outputFileName = $"output/{Guid.NewGuid()}.{this._fileType}";
         }
 
         #endregion
