@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Serilog;
 using VideoEncoderReact.Extensions;
 using VideoEncoderReact.VideoEncoder.Interfaces;
 
@@ -15,12 +16,10 @@ namespace VideoEncoderReact.Controllers
     [Route("api/VideoEncoder")]
     public class VideoEncoderController : ControllerBase
     {
-        private readonly ILogger<VideoEncoderController> _logger;
         private readonly IVideoEncoderEngine _videoEncoderEngine;
 
-        public VideoEncoderController(ILogger<VideoEncoderController> logger, IVideoEncoderEngine videoEncoderEngine)
+        public VideoEncoderController( IVideoEncoderEngine videoEncoderEngine)
         {
-            _logger = logger;
             _videoEncoderEngine = videoEncoderEngine;
         }
 
@@ -35,7 +34,7 @@ namespace VideoEncoderReact.Controllers
             }
             catch (Exception ex)
             {
-             _logger.LogError("Exception bubbled up to controller, SetInputVideo(byte[] input)", ex);
+                Log.Error("Exception bubbled up to controller, SetInputVideo(byte[] input)", ex);
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
@@ -50,7 +49,7 @@ namespace VideoEncoderReact.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError("Exception bubbled up to controller, StartWrite()", ex);
+                Log.Error("Exception bubbled up to controller, StartWrite()", ex);
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }

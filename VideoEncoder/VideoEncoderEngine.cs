@@ -3,6 +3,7 @@ using FFMpegCore.Enums;
 using FFMpegCore.Pipes;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using Serilog;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
@@ -20,12 +21,10 @@ namespace VideoEncoderReact.VideoEncoder
         private string OutputFileName;
         private string FileType;
         private byte[] InputVideo;
-        private readonly ILogger<VideoEncoderEngine> _logger;
 
-        public VideoEncoderEngine(ILogger<VideoEncoderEngine> logger)
+        public VideoEncoderEngine()
         {
-            this._logger = logger;
-            this.FileType = "mp4";
+            FileType = "mp4";
             GenerateNewOutputFileName();
         }
 
@@ -33,11 +32,11 @@ namespace VideoEncoderReact.VideoEncoder
         {
             try
             {
-                this.InputVideo = await input.GetBytesAsync();
+                InputVideo = await input.GetBytesAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError("Error in SetInputFile()", ex);
+               Log.Error(ex,"Error in SetInputFile()");
             }
 
             return false;
@@ -46,7 +45,7 @@ namespace VideoEncoderReact.VideoEncoder
         public async Task<bool> WriteVideo()
         {
 
-            if (this.OutputFileName == string.Empty)
+            if (OutputFileName == string.Empty)
             {
                 throw new Exception($"OutputFileName was {OutputFileName}");
             }
@@ -57,7 +56,7 @@ namespace VideoEncoderReact.VideoEncoder
                 {
                     var pipe = new StreamPipeSource(await InputVideo.ToMemoryStreamAsync());
                     var stopWatch = new Stopwatch();
-                    _logger.LogInformation($"Starting writing input video to {this.OutputFileName}");
+                  Log.Information($"Starting writing input video to {this.OutputFileName}");
                     
                     stopWatch.Start();
                     await FFMpegArguments
@@ -71,7 +70,7 @@ namespace VideoEncoderReact.VideoEncoder
                                     .OutputToFile(this.OutputFileName)
                                     .ProcessAsynchronously();
 
-                    _logger.LogInformation($"Finished writing video to {this.OutputFileName} in " +
+                    Log.Information($"Finished writing video to {this.OutputFileName} in " +
                         $"{stopWatch.ElapsedMilliseconds.ToString("n3")}ms");
                     stopWatch.Stop();
                     return true;
@@ -79,20 +78,20 @@ namespace VideoEncoderReact.VideoEncoder
             }
             catch (Exception ex)
             {
-                _logger.LogError("Error in VideoEncoderEngine.WriteVideo()", ex);
+               Log.Error(ex,"Error in VideoEncoderEngine.WriteVideo()");
                 
                 return false;
             }   
         }
 
-        public async Task<byte[]> GetVideo()
+        public Task<byte[]> GetVideo()
         {
-            if (this.InputVideo == null)
+            if (InputVideo == null)
             {
                 throw new NullReferenceException("An exception occured at GetVideo(), the video was null.");
             }
 
-            return this.InputVideo;
+            return Task.FromResult(InputVideo);
         }
 
         #region Private Methods
