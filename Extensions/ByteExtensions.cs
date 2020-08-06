@@ -25,19 +25,14 @@ namespace VideoEncoderReact.Extensions
             }
         }
 
-        public static MemoryStream ToMemoryStream(this byte[] byteArray)
+        public static async Task<MemoryStream> ToMemoryStreamAsync(this byte[] byteArray)
         {
             try
             {
-                // Probably add a comment here stating that the lack of using statements
-                // is deliberate.
+                // src https://stackoverflow.com/a/11528766
                 MemoryStream stream = new MemoryStream();
 
-                StreamWriter writer = new StreamWriter(stream);
-                // Code that writes stuff to the memorystream via streamwriter
-                writer.Write(byteArray);
-
-                writer.Flush();
+                await stream.WriteAsync(byteArray);
                 stream.Position = 0;
                 return stream;
             }

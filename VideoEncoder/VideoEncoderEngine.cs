@@ -55,7 +55,7 @@ namespace VideoEncoderReact.VideoEncoder
             {
                 
                 {
-                    var pipe = new StreamPipeSource(InputVideo.ToMemoryStream());
+                    var pipe = new StreamPipeSource(await InputVideo.ToMemoryStreamAsync());
                     var stopWatch = new Stopwatch();
                     _logger.LogInformation($"Starting writing input video to {this.OutputFileName}");
                     
